@@ -13,9 +13,7 @@ function bubbleSort(nums){
     for (let i = 0; i < nums.length; i++){
         for (let j = 0; j < nums.length; j++){
             if (nums[i] < nums[j]) {
-                let temp = nums[i]; //you can use destructuring instead of temp
-                nums[i] = nums[j];
-                nums[j] = temp;
+                [nums[i],nums[j]] = [nums[j],nums[i]];
             }
         }
     }

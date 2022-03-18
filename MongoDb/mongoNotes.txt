@@ -1,0 +1,21 @@
+
+INSERT DOCUMENT INTO A COLLECTION
+// Pattern:
+db.COLLECTION_NAME.insert({YOUR_JSON_DOCUMENT})  
+ 
+// Example:
+db.ninjas.insert({name: "Trey", belt: "black", status: "awesome"})
+
+
+
+READ DOCUMENT FROM A COLLECTION// Pattern: 
+db.COLLECTION_NAME.find({YOUR_QUERY_DOCUMENT})
+// Example:
+db.ninjas.find({name: "Trey"})
+
+---gives you all the documents that match the query
+---you can get just the first document based on time stamp id that matches the query using findOne instead of find
+***look at docs to find it
+--- .pretty() formats output
+
+

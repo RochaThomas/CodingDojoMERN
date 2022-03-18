@@ -19,3 +19,156 @@ db.ninjas.find({name: "Trey"})
 --- .pretty() formats output
 
 
+
+------------------------------------------------------------------
+FULL CRUD DEMO
+
+mongoose is a library that helps us interface with mongodb database
+
+create an empty folder
+
+mkdir server make a server folder 
+cd into server folder
+touch server.js make a server file 
+
+next initialize a node project (parallel to server.js)
+npm init -y 
+this will make server file the entry point
+
+install some packages
+npm install express mongoose
+installs as dependencies in package.json
+create a .gitignore and tell it to ignore node modules
+check video for how to do that ^
+
+go into server.js 
+const express = require('express');
+const app = express();
+const PORT = 8000;
+
+at the end of the file
+app.listen(PORT, () => console.log(`>>>>> server up on port: $(PORT) <<<<<`)
+
+run nodemon server.js to test if its running and now it will reload on every save
+
+create new folders to organize work
+stop server
+mkdir config controllers models routes
+this will make all the folders
+
+run server again
+
+1. connect mongodb with the server using mongoose
+go into config and call it mongoose.config.js 
+this file will connect to the database
+
+first we import mongoose (require)
+const mongoose = require('mongoose');
+you can hardcode the database name at the top too
+const DB_NAME = 'goose'; goose is just an example name
+mongoose.connect('mongodb://localhost/' + DB_NAME), {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
+    .then(() => console.log(`Established a connection to the database`))
+    .catch(err => console.log('Something went wrong when connecting to the database', err)); 
+this .connect function is a promise and needs a then and catch
+
+go back to the server.js file and import the mongoose.config.js file
+require('./config/mongoose.config');
+
+this should have successfully connect the mongodb 
+
+you can also import the middleware above the import of the mongoose file
+app.use(express.json(), express.urlencoded({extended:true}));
+
+2. now we are going to create the models 
+go to models folder and make a file called user.models.js 
+
+import mongoose again
+const mongoose = require('mongoose');
+
+now create the schema
+const UserSchema = new mongoose.Schema({
+    name: String,
+    age: Number
+}, {timestamps: true});
+here you are creating a Schema object
+timestamps just shows when the object is started
+
+now we create the model 
+this is what we use to make the actual queries to the DB
+const User = mongoose.model('User', UserSchema); <-- user is the instantiated model from this schema
+
+now we export the model
+module.exports = User;
+this exports the user object
+
+3. we now need to import the model into the controller
+go to the controller folder 
+make a file called user.controllers.js 
+the controller is what will do all the CRUD 
+
+import the model first
+const User = require('../models/user.model');
+
+module.exports.findAllUsers = (req, res) => {
+    User.find()
+    //what we return here is what we will receive in REACT
+        .then(allDaUsers => res.json({ users: allDaUsers }))
+        .catch(err => res.json({ message: 'Something went wrong', error: err }));
+}
+module.exports.findOneSingleUser = (req, res) => {
+    User.findOne({ _id: req.params.id })
+        .then(oneSingleUser => res.json({ user: oneSingleUser }))
+        .catch(err => res.json({ message: 'Something went wrong', error: err }));
+}
+ 
+module.exports.createNewUser = (req, res) => {
+    User.create(req.body)
+        .then(newlyCreatedUser => res.json({ user: newlyCreatedUser }))
+        .catch(err => res.json({ message: 'Something went wrong', error: err }));
+}
+ 
+module.exports.updateExistingUser = (req, res) => {
+    User.findOneAndUpdate(
+        { _id: req.params.id },
+        req.body,
+        { new: true, runValidators: true }
+    )
+        .then(updatedUser => res.json({ user: updatedUser }))
+        .catch(err => res.json({ message: 'Something went wrong', error: err }));
+}
+ 
+module.exports.deleteAnExistingUser = (req, res) => {
+    User.deleteOne({ _id: req.params.id })
+        .then(result => res.json({ result: result }))
+        .catch(err => res.json({ message: 'Something went wrong', error: err }));
+}
+the first function is a read all query written as a promise 
+
+4. we need to make routes for our controllers
+go to routes folder and make a file called user.routes.js 
+
+first we need to require the controller file
+const UserController = require('../controllers/user.controller');
+
+next we need to export the routes to the server file
+module.exports = app => {
+    app.get('/api/users', UserController.findAllUsers);
+    app.get('/api/users/:id', UserController.findOneSingleUser);
+    app.put('/api/users/:id', UserController.updateExistingUser);
+    app.post('/api/users', UserController.createNewUser);
+    app.delete('/api/users/:id', UserController.deleteAnExistingUser);
+}
+
+5. import routes into server.js 
+require('./routes/user.routes')(app);
+or const RouteFunction = require('./routes/user.routes');
+RouteFunction(app);
+
+6. next we can go to postman and test out our database
+
+if you try a post method that doesnt follow the model you will get an error
+but initially you can enter empty objects without errors 
+you can fix this with validations

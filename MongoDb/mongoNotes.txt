@@ -38,8 +38,7 @@ this will make server file the entry point
 install some packages
 npm install express mongoose
 installs as dependencies in package.json
-create a .gitignore and tell it to ignore node modules
-check video for how to do that ^
+create a .gitignore and tell it to ignore node modules /node_modules
 
 go into server.js 
 const express = require('express');
@@ -47,7 +46,7 @@ const app = express();
 const PORT = 8000;
 
 at the end of the file
-app.listen(PORT, () => console.log(`>>>>> server up on port: $(PORT) <<<<<`)
+app.listen(PORT, () => console.log(`>>>>> server up on port: ${PORT} <<<<<`)
 
 run nodemon server.js to test if its running and now it will reload on every save
 

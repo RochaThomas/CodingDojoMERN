@@ -1,0 +1,22 @@
+starting with empty project folder
+
+created a server folder
+put all backend in server folder
+server.js controllers config models and routes
+
+need to install cors
+require cors in server.js file
+const cors = require('cors');
+app.use(cors());
+this tells the server to accept any request
+
+create a react app folder named client parallel to server folder
+
+in client 
+install axios and maybe react router dom if you need it 
+now you can start your client react server
+
+you can now have both servers runnning in two separate terminals
+one running mongodb and one running react
+
+where ever you are running axios methods you need to put http://localhost:8000/ <- some server route look in your server routes file

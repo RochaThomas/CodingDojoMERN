@@ -1,0 +1,284 @@
+
+SET UP SERVER
+1. make a empty folder with whatever name
+
+2. make a server folder in that project
+
+3. make a server.js file
+
+4. install stuff
+npm install
+npm install express mongoose cors
+
+5. make folder structure
+mkdir config controllers models routes
+
+6. in the server folder...
+const express = require('express');
+const cors = require('cors');
+const app = express();
+const PORT  = 8000;
+
+const DB = "example_db_name";
+
+//middleware
+app.use(express,json(), cors(), express.urlencoded({extended: true}));
+
+app.listen(PORT, () => console.log(`>>>>> Server up on port ${PORT} <<<<<`));
+
+7. check to see if server is running 
+nodemon server.js
+
+CONNECT DATABASE
+1. go to config folder 
+make mongoose.config.js file
+
+2. put in mongoose.config.js file
+const mongoose = require('mongoose');
+
+module.exports = (DB) => {
+    mongoose.connect(`mongodb://localhost/${DB}`)
+        .then(() => console.log(`Connected to ${DB}`);)
+        .catch(err => console.log(`Cannot connect to ${DB}`, err);)
+}
+
+3. go back to server.js
+
+4. require config file after the middleware
+require('./config/mongoose.config')(DB);
+
+SETUP MODELS
+1. go to models folder
+
+2. make a file something like example.models.js 
+
+3. in the models file...
+const mongoose = require('mongoose');
+const ExampleSchema = new mongoose.Schema({
+    field1 : {
+        type: String,
+        required: [true, '{PATH} must be present'],
+        minlength: [3, '{PATH must be at least 3 chars']
+    },
+    field2 : {
+        type: String,
+    },
+    field3 : {
+        type: Boolean,
+        default: false
+    }   
+}, {timestamp: true});
+
+4. create the Schema and export it 
+const Example = mongoose.model('Example', ExampleSchema);
+module.exports = Example;
+
+CONTROLLERS 
+controllers are for CRUD
+1. go to controllers folder and make a file like Example.controllers.js 
+
+2. import the model 
+const Example = require('../models/Example.models);
+
+3. create an object to export the controllers
+module.exports = {
+
+    //read all
+    findAllExamples : (req, res) => {
+        Example.find()
+            .then(allExamples => {
+                console.log('Finding all examples in the db');
+                return res.json({Examples: allExamples});
+            })
+            .catch(err => res.json({message: 'Something went wrong with the read all', error: err}));
+    }
+}
+
+4. check to see if this is working so you have to make some routes --> routes 1.
+
+5. come back and finish the controllers
+module.exports = {
+
+    //read all
+    findAllExamples : (req, res) => {
+        Example.find()
+            .then(allExamples => {
+                console.log('Finding all examples in the db');
+                return res.json({examples: allExamples});
+            })
+            .catch(err => res.json({message: 'Something went wrong with the read all', error: err}));
+    },
+
+    //read one
+    findOneExample : (req, res) => {
+        Example.findById(req.params._id)
+        //variable name '_id' from params must match route param
+            .then(oneExample => {
+                console.log('Finding one example in the db by id');
+                return res.json({example: oneExample});
+            })
+            .catch(err => res.json({message: 'Something went wrong with the read one', error: err}));
+    },
+
+    //create 
+    createExample : (req, res) => {
+        Example.create(req.body)
+            .then(newExample => {
+                console.log('Created a new example in the db')
+                return res.json({example: newExample});
+            })
+            .catch(err => res.json({message: 'Something went wrong with the create', error: err}));
+    },
+
+    //updateOne
+    updateExample : (req, res) => {
+        //remember '_id' is a param that must match the route param
+        Example.findByIdAndUpdate(req.params._id, req.body), {
+            new: true,
+            runValidators: true
+        }
+            .then(updatedExample => {
+                console.log('Updated an example in the db');
+                return res.json({example: updatedExample});
+            })
+            .catch(err => res.json({message: 'Something went wrong with the update', error: err}));
+    },
+
+    //delete
+    deleteExample : (req, res) => {
+        Example.deleteOne({_id: req.params._id})
+        // '_id' is a param that must match the route param
+            .then(result => {
+                console.log('Deleted an example from the db');
+                return res.json({result: result});
+            })
+            .catch(err => res.json({message: 'Something went wrong with the delete', error: err}));
+    }
+
+}
+
+ROUTING
+1. go to routes folder and create a file like Example.routes.js 
+
+2. import the controller
+const Example = require('../controllers/Example.controllers');
+
+3. make some routes 
+module.exports = (app) => {
+    app.get('/api/examples', Note.findAllExamples)
+}
+
+4. time to test but first we have to connect the routes --> go to server.js 
+
+5. make the rest of the routes
+module.exports = (app) => {
+    app.get('/api/examples', Note.findAllExamples)
+    app.get('/api/examples/:_id', Note.findOneExample)
+    app.post('/api/examples/new', Note.createExample)
+    app.put('/api/examples/update/:_id', Note.updateExample)
+    app.delete('/api/examples/delete/:_id', Note.deleteExample)
+}
+
+GO BACK TO SERVER 
+1. in server.js connect routes under database connection
+require('./routes/Example.routes')(app);
+
+2. test using postman or the browser
+
+3. now go back and fill in all the rest of the controllers and routes 
+
+-----------------------------------------------
+BACK END TIME 
+
+SETUP REACT
+1. make sure you are parallel to server folder inside the project folder
+npx create-react-app client
+
+2. cd into client 
+cd client
+ 
+3. install some stuff
+npm install axios react-router-dom@5
+
+4. start the react server (should be parallel to package.json)
+npm start 
+
+SETUP BrowserRouter
+1. go to index.js 
+import {BrowserRouter} from 'react-router-dom';
+
+2. wrap app in BrowserRouter
+<BrowserRouter>
+    <App>
+</BrowserRouter>
+
+SETUP App.js
+1. import stuff for proper routing
+import {Link, Switch, Route, Redirect} from 'react-router-dom';
+
+2. switch on the routes
+<Switch>
+    <Route path="/examples">
+        <Main/>
+    </Route>
+    //you can also use redirect to force a route to another route
+    <Route path="/">
+        <Redirect to='/examples'/>
+    </Route>
+</Switch>
+
+CREATE A MAIN
+1. create a folder called views inside the client folder
+
+2. create a file called Main.jsx in the views folder
+
+3. inside main, import some react
+import React, {useEffect, useState} from 'react';
+import axios from 'axios';
+
+4. set up main component
+const Main = (props) => {
+
+    const [examples, setExamples] = useState([]);
+
+    useEffect(() => {
+        axios.get('http://localhost:8000/api/examples')
+            .then(res => {
+                //first print out the res so you can see what you need to .focus on 
+                //in this case it is .examples
+                console.log(res.data.examples);
+                setExamples(res.data.examples);
+            })
+            .catch(err => console.log(err));
+    },[]);
+
+    return (
+        <div>
+            <h2>Some Example Header</h2>
+            // you can map over the examples to show them
+            {
+                examples.map((example) => {
+                    return (
+                        <div key={example._id}>
+                            {example.example1}
+                        </div>
+                    )
+                })
+            }
+        </div>
+    );
+}
+
+5. you can also style your main using a cs module 
+create a file called Main.module.css in the views folder
+
+6. import the styling module
+import 'ourStyling' from './Main.module.css'
+
+7. to use this in the className use ourStyling.whateverYouCalledTheClass
+
+CREATE VIEWS AND COMPONENTS FOR THE REST OF THE FRONT END TO MATCH BACKEND FUNCTIONS
+some form would go into components 
+displaying one would be a view 
+you can put components into your views
+putting the a form into main is an example

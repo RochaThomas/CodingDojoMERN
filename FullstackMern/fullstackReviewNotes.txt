@@ -282,3 +282,30 @@ some form would go into components
 displaying one would be a view 
 you can put components into your views
 putting the a form into main is an example
+
+
+VALIDATIONS
+
+in controllers in every catch
+.catch(err => res.status(400).json(err))
+
+in client size axios calls in every catch
+
+//get all the errors from err.response.data 
+const errorResponse = err.response.data.errors;
+//define an array to push error messages to
+const errorArr = [];
+
+//loop through all the errors and push the message to the array 
+for (const key of Object.keys(errorResponse)) {
+        errorArr.push(errorResponse[key].message)
+}
+
+make a state variable
+const [errors, setErrors] = useState([]);
+
+in the return statement
+
+{errors.map((err, index) => <p key={index}>{err}</p>)}
+
+then you can style the errors how you want

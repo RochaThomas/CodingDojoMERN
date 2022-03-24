@@ -7,8 +7,10 @@ SET UP SERVER
 3. make a server.js file
 
 4. install stuff
-npm install
+npm init -y 
 npm install express mongoose cors
+make a .gitignore
+put in /node_modules
 
 5. make folder structure
 mkdir config controllers models routes
@@ -133,10 +135,10 @@ module.exports = {
     //updateOne
     updateExample : (req, res) => {
         //remember '_id' is a param that must match the route param
-        Example.findByIdAndUpdate(req.params._id, req.body), {
+        Example.findByIdAndUpdate(req.params._id, req.body, {
             new: true,
             runValidators: true
-        }
+        })
             .then(updatedExample => {
                 console.log('Updated an example in the db');
                 return res.json({example: updatedExample});
@@ -188,7 +190,7 @@ require('./routes/Example.routes')(app);
 3. now go back and fill in all the rest of the controllers and routes 
 
 -----------------------------------------------
-BACK END TIME 
+FRONT END TIME 
 
 SETUP REACT
 1. make sure you are parallel to server folder inside the project folder
